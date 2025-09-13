@@ -97,7 +97,7 @@ jobs:
       - name: Run OWASP ZAP Baseline Scan
         run: |
           docker run --rm -v $(pwd):/zap/wrk/:rw \
-          owasp/zap2docker-stable \
+          zaproxy/zap-stable \
           zap-baseline.py -t http://juiceshop:3000 \
           -r zap-baseline-report.html \
           -j zap-baseline-report.json || true
