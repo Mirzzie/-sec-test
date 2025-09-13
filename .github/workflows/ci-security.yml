@@ -94,9 +94,13 @@ jobs:
             sleep 6
           done
           echo "Staging not responding"; exit 1
-      - name: Run OWASP ZAP baseline scan (Docker)
+      - name: Run OWASP ZAP Baseline Scan
         run: |
-          docker run --rm -v $(pwd):/zap/wrk/:rw owasp/zap2docker-stable zap-baseline.py -t http://${{ secrets.STAGING_SSH_HOST }}:3000 -r zap-baseline-report.html -j zap-baseline-report.json || true
+          docker run --rm -v $(pwd):/zap/wrk/:rw \
+          owasp/zap2docker-stable \
+          zap-baseline.py -t http://juiceshop:3000 \
+          -r zap-baseline-report.html \
+          -j zap-baseline-report.json || true
       - name: Upload ZAP report
         uses: actions/upload-artifact@v4
         with:
