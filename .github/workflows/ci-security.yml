@@ -97,6 +97,7 @@ jobs:
       - name: Run OWASP ZAP Baseline Scan
         run: |
           mkdir -p $GITHUB_WORKSPACE/zap-reports
+          chmod 777 $GITHUB_WORKSPACE/zap-reports
           docker run --rm \
           -v $GITHUB_WORKSPACE/zap-reports:/zap/wrk:rw \
           -t zaproxy/zap-stable:latest \
