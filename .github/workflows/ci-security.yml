@@ -82,7 +82,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} << 'EOF'
             docker pull $IMAGE
-            docker rm -f bkimminich/juiceshop || true
+            docker rm -f mirzzie/juiceshop || true
             docker run -d --name juiceshop -p 3000:3000 --restart unless-stopped $IMAGE
           EOF
       - name: Wait for staging to be ready
