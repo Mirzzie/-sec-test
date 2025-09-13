@@ -100,6 +100,8 @@ jobs:
           docker run --rm \
           -v $GITHUB_WORKSPACE/zap-reports:/zap/wrk:rw \
           -t zaproxy/zap-stable:latest \
+          bash -c "\
+          touch /zap/wrk/zap-baseline-report.html /zap/wrk/zap-baseline-report.json && \
           zap-baseline.py \
             -t http://${{secrets.STAGING_SSH_HOST }}:3000 \
             -r /zap/wrk/zap-baseline-report.html \
