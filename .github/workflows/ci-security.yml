@@ -2,12 +2,12 @@ name: CI-Security-Pipeline-Recreation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 env:
-  IMAGE_NAME: "yourdockerhubusername/juiceshop"
+  IMAGE_NAME: "mirzzie/juiceshop"
   TAG: ${{ github.sha }}
 
 jobs:
