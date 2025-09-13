@@ -98,7 +98,7 @@ jobs:
         run: |
           docker run --rm -v $(pwd):/zap/wrk/:rw \
           zaproxy/zap-stable \
-          zap-baseline.py -t http://juiceshop:3000 \
+          zap-baseline.py -t http://${{secrets.STAGING_SSH_HOST }}:3000 \
           -r zap-baseline-report.html \
           -j zap-baseline-report.json || true
       - name: Upload ZAP report
