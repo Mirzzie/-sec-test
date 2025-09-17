@@ -104,13 +104,10 @@ jobs:
           sudo apt update
           sudo apt install -y openjdk-17-jdk unzip curl
 
-      - name: Download and Install StackHawk CLI
+      - name: Install StackHawk CLI
         run: |
-          curl -L https://download.stackhawk.com/hawk/cli/hawk-2.6.0.zip -o hawk.zip
-          unzip hawk.zip -d hawk-cli
-          sudo mv hawk-cli/hawk-2.6.0 /opt/stackhawk
-          export PATH=$PATH:/opt/stackhawk
-          echo "/opt/stackhawk" >> $GITHUB_PATH
+          curl -sSL https://download.stackhawk.com/hawk/install.sh | bash
+          echo "$HOME/.stackhawk/bin" >> $GITHUB_PATH
 
       - name: Authenticate StackHawk CLI
         run: |
