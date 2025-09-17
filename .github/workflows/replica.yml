@@ -108,16 +108,17 @@ jobs:
         run: |
           curl -L https://download.stackhawk.com/hawk/cli/hawk-2.6.0.zip -o hawk.zip
           unzip hawk.zip -d hawk-cli
-          sudo mv hawk-cli /opt/hawk-cli
-          sudo ln -s /opt/hawk-cli/hawk-2.6.0/hawk /usr/local/bin/hawk
+          sudo mv hawk-cli/hawk-2.6.0 /opt/stackhawk
+          export PATH=$PATH:/opt/stackhawk
+          echo "/opt/stackhawk" >> $GITHUB_PATH
 
       - name: Authenticate StackHawk CLI
         run: |
-          hawk init --api-key ${{ secrets.STACKHAWK_API_KEY }}
+          /opt/stackhawk/hawk init --api-key ${{ secrets.STACKHAWK_API_KEY }}
 
       - name: Run StackHawk DAST scan
         run: |
-          hawk scan \
+          /opt/stackhawk/hawk scan \
             --app-url http://${{ secrets.STAGING_SSH_HOST }}:3000 \
             --json > stackhawk-report.json || true
 
