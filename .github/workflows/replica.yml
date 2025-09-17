@@ -99,13 +99,18 @@ jobs:
           done
           echo "Staging not responding"; exit 1
 
-      - name: Install StackHawk CLI
+      - name: Download and Install StackHawk CLI
         run: |
-          npm install -g @stackhawk/cli
+          curl -L https://download.stackhawk.com/hawk/cli/hawk-2.6.0.zip -o hawk.zip
+          unzip hawk.zip
+          sudo mv hawk-2.6.0/hawk /usr/local/bin/hawk
+          rm -rf hawk.zip hawk-2.6.0
+
+      - name: Authenticate StackHawk CLI
+        run: |
+          hawk init --api-key ${{ secrets.STACKHAWK_API_KEY }}
 
       - name: Run StackHawk DAST scan
-        env:
-          HAWK_API_KEY: ${{ secrets.STACKHAWK_API_KEY }}
         run: |
           hawk scan --app-url http://${{ secrets.STAGING_SSH_HOST }}:3000 --json > stackhawk-report.json || true
 
