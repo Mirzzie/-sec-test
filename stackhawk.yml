@@ -1,4 +1,4 @@
 app:
   applicationId: bf702d42-3189-4f20-a5f6-8006cb6ef051
   env: "staging"
-  host: http://localhost:3000
+  host: http://${{ secrets.STAGING_SSH_HOST }}:3000
