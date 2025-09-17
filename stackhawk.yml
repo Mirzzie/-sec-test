@@ -1,4 +1,4 @@
 app:
   applicationId: bf702d42-3189-4f20-a5f6-8006cb6ef051
   env: "staging"
-  host: http://placeholder:3000
+  host: http://3.254.172.111:3000
