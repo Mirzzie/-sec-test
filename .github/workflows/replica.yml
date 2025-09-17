@@ -116,11 +116,23 @@ jobs:
         run: |
           /opt/stackhawk/hawk init --api-key ${{ secrets.STACKHAWK_API_KEY }}
 
-      - name: Run StackHawk DAST scan
+      - name: Generate StackHawk config
         run: |
-          /opt/stackhawk/hawk scan \
-            --app-url http://${{ secrets.STAGING_SSH_HOST }}:3000 \
-            --json > stackhawk-report.json || true
+          cat <<EOF > stackhawk.yml
+          app:
+            id: "${{ secrets.STACKHAWK_APP_ID }}"
+            env: "staging"
+            host: "http://${{ secrets.STAGING_SSH_HOST }}:3000"
+          EOF
+
+      - name: Run StackHawk DAST scan
+        env:
+          STACKHAWK_API_KEY: ${{ secrets.STACKHAWK_API_KEY }}
+        run: |
+          /usr/local/bin/hawk scan \
+            --api-key $STACKHAWK_API_KEY \
+            --config stackhawk.yml \
+            --output stackhawk-report.json || true
 
       - name: Upload StackHawk report
         uses: actions/upload-artifact@v4
