@@ -1,14 +1,4 @@
-# # -- stackhawk configuration for test --
-# app:
-#   # -- An applicationId obtained from the StackHawk platform. --
-#   applicationId: bf702d42-3189-4f20-a5f6-8006cb6ef051 # (required)
-#   # -- The environment for the applicationId defined in the StackHawk platform. --
-#   env: Development # (required)
-#   # -- The url of your application to scan --
-#   host: https://3.254.172.111:3000 # (required)
-
 app:
-
   applicationId: bf702d42-3189-4f20-a5f6-8006cb6ef051
   env: "staging"
-  host: "http://${{ secrets.STAGING_SSH_HOST }}:3000"
+  # host: http://localhost:3000
