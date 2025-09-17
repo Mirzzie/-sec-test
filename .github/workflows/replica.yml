@@ -99,12 +99,17 @@ jobs:
           done
           echo "Staging not responding"; exit 1
 
+      - name: Install OpenJDK 17
+        run: |
+          sudo apt update
+          sudo apt install -y openjdk-17-jdk unzip curl
+
       - name: Download and Install StackHawk CLI
         run: |
           curl -L https://download.stackhawk.com/hawk/cli/hawk-2.6.0.zip -o hawk.zip
-          unzip hawk.zip
-          sudo mv hawk-2.6.0/hawk /usr/local/bin/hawk
-          rm -rf hawk.zip hawk-2.6.0
+          unzip hawk.zip -d hawk-cli
+          sudo mv hawk-cli /opt/hawk-cli
+          sudo ln -s /opt/hawk-cli/hawk-2.6.0/hawk /usr/local/bin/hawk
 
       - name: Authenticate StackHawk CLI
         run: |
@@ -112,7 +117,9 @@ jobs:
 
       - name: Run StackHawk DAST scan
         run: |
-          hawk scan --app-url http://${{ secrets.STAGING_SSH_HOST }}:3000 --json > stackhawk-report.json || true
+          hawk scan \
+            --app-url http://${{ secrets.STAGING_SSH_HOST }}:3000 \
+            --json > stackhawk-report.json || true
 
       - name: Upload StackHawk report
         uses: actions/upload-artifact@v4
