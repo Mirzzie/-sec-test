@@ -17,13 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Snyk
-        run: |
-          npm install -g snyk
+        run: npm install -g snyk
       - name: Run Snyk SAST scan
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: |
-          snyk test --all-projects --json > snyk-report.json || true
+        run: snyk test --all-projects --json > snyk-report.json || true
       - name: Upload Snyk report
         uses: actions/upload-artifact@v4
         with:
@@ -41,14 +39,11 @@ jobs:
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
           echo "$PWD/bin" >> $GITHUB_PATH
       - name: Build Docker image
-        run: |
-          docker build -t $IMAGE_NAME:${{ env.TAG }} .
+        run: docker build -t $IMAGE_NAME:${{ env.TAG }} .
       - name: Run Trivy filesystem scan (SBOM + SCA)
-        run: |
-          trivy fs --format json --output trivy-fs-report.json .
+        run: trivy fs --format json --output trivy-fs-report.json .
       - name: Scan Docker image with Trivy
-        run: |
-          trivy image --format json --output trivy-image-report.json $IMAGE_NAME:${{ env.TAG }} || true
+        run: trivy image --format json --output trivy-image-report.json $IMAGE_NAME:${{ env.TAG }} || true
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -80,25 +75,32 @@ jobs:
           echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy image to staging EC2 (via SSH)
+      - name: Deploy DVWA + MySQL on staging EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
-          "docker pull ${{ env.IMAGE_NAME }}:${{ env.TAG }} && \
-           docker rm -f dvwa || true && \
-           docker run -d --name dvwa -p 4280:80 --restart unless-stopped ${{ env.IMAGE_NAME }}:${{ env.TAG }}"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} "
+            docker network create dvwa-net || true && \
 
-      - name: Wait for staging to be ready
-        run: |
-          for i in {1..20}; do
-            if curl -s http://${{ secrets.STAGING_SSH_HOST }}:4280/ | grep -q "dvwa"; then
-              echo "dvwa ready"
-              exit 0
-            fi
-            echo "Waiting..."
-            sleep 6
-          done
-          echo "Staging not responding"; exit 1
+            # Start MySQL
+            docker rm -f dvwa-db || true && \
+            docker run -d --name dvwa-db \
+              --network dvwa-net \
+              -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
+              -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
+              -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
+              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              mysql:5.7 && \
 
+            # Start DVWA
+            docker rm -f dvwa || true && \
+            docker run -d --name dvwa \
+              --network dvwa-net \
+              -p 4280:80 \
+              -e MYSQL_HOST=dvwa-db \
+              -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
+              -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
+              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              $IMAGE_NAME:${{ env.TAG }}
+          "
       - name: Run StackHawk DAST scan
         uses: stackhawk/hawkscan-action@v2
         with:
