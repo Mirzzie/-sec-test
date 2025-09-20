@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_NAME: "mirzzie/juiceshop"
+  IMAGE_NAME: "mirzzie/dvwa"
   TAG: ${{ github.sha }}
 
 jobs:

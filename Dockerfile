@@ -1,1 +1,1 @@
-FROM bkimminich/juice-shop:latest
+FROM ghcr.io/digininja/dvwa:c6e3d05
