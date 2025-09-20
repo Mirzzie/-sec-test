@@ -85,7 +85,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
           "docker pull ${{ env.IMAGE_NAME }}:${{ env.TAG }} && \
            docker rm -f dvwa || true && \
-           docker run -d --name dvwa -p 4280:4280 --restart unless-stopped ${{ env.IMAGE_NAME }}:${{ env.TAG }}"
+           docker run -d --name dvwa -p 4280:80 --restart unless-stopped ${{ env.IMAGE_NAME }}:${{ env.TAG }}"
 
       - name: Wait for staging to be ready
         run: |
