@@ -84,14 +84,14 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} \
           "docker pull ${{ env.IMAGE_NAME }}:${{ env.TAG }} && \
-           docker rm -f juiceshop || true && \
-           docker run -d --name juiceshop -p 3000:3000 --restart unless-stopped ${{ env.IMAGE_NAME }}:${{ env.TAG }}"
+           docker rm -f dvwa || true && \
+           docker run -d --name dvwa -p 4280:4280 --restart unless-stopped ${{ env.IMAGE_NAME }}:${{ env.TAG }}"
 
       - name: Wait for staging to be ready
         run: |
           for i in {1..20}; do
-            if curl -s http://${{ secrets.STAGING_SSH_HOST }}:3000/ | grep -q "OWASP Juice Shop"; then
-              echo "Juice Shop ready"
+            if curl -s http://${{ secrets.STAGING_SSH_HOST }}:4280/ | grep -q "dvwa"; then
+              echo "dvwa ready"
               exit 0
             fi
             echo "Waiting..."
@@ -104,7 +104,7 @@ jobs:
         with:
           apiKey: ${{ secrets.STACKHAWK_API_KEY }}
         env:
-          APP_HOST: "http://${{ secrets.STAGING_SSH_HOST }}:3000"
+          APP_HOST: "http://${{ secrets.STAGING_SSH_HOST }}:4280"
           APP_ID: ${{ secrets.STACKHAWK_APP_ID }}
           APP_ENV: "staging"
 
