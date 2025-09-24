@@ -95,10 +95,11 @@ jobs:
             docker run -d --name dvwa \
               --network dvwa-net \
               -p 4280:80 \
-              -e MYSQL_HOST=dvwa-db \
-              -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
-              -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
-              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              -e DB_SERVER=dvwa-db \
+              -e DB_DATABASE=${{ secrets.MYSQL_DATABASE }} \
+              -e DB_USER=${{ secrets.MYSQL_USER }} \
+              -e DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}
+              -e DB_PORT=${{secrets.MYSQL_PORT}} \
               $IMAGE_NAME:${{ env.TAG }}
           "
       - name: Run StackHawk DAST scan
