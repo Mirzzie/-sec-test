@@ -77,30 +77,39 @@ jobs:
 
       - name: Deploy DVWA + MySQL on staging EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} "
-            docker network create dvwa-net || true && \
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }} << 'EOF'
+            docker network create dvwa-net || true
 
             # Start MySQL
-            docker rm -f dvwa-db || true && \
+            docker rm -f dvwa-db || true
             docker run -d --name dvwa-db \
               --network dvwa-net \
-              -e MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }} \
-              -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
-              -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
-              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
-              mysql:5.7 && \
+              -e MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD} \
+              -e MYSQL_DATABASE=${MYSQL_DATABASE} \
+              -e MYSQL_USER=${MYSQL_USER} \
+              -e MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+              mysql:5.7
 
             # Start DVWA
-              docker rm -f dvwa || true && \
-              docker run -d --name dvwa \
-                --network dvwa-net \
-                -p 4280:80 \
-                -e DB_SERVER=dvwa-db \
-                -e DB_DATABASE=${{ secrets.MYSQL_DATABASE }} \
-                -e DB_USER=${{ secrets.MYSQL_USER }} \
-                -e DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
-                -e DB_PORT=${{ secrets.MYSQL_PORT }} \
-                $IMAGE_NAME:${{ env.TAG }}
+            docker rm -f dvwa || true
+            docker run -d --name dvwa \
+              --network dvwa-net \
+              -p 4280:80 \
+              -e DB_SERVER=dvwa-db \
+              -e DB_DATABASE=${MYSQL_DATABASE} \
+              -e DB_USER=${MYSQL_USER} \
+              -e DB_PASSWORD=${MYSQL_PASSWORD} \
+              -e DB_PORT=${MYSQL_PORT} \
+              $IMAGE_NAME:${TAG}
+          EOF
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          TAG: ${{ env.TAG }}
 
       - name: Run StackHawk DAST scan
         uses: stackhawk/hawkscan-action@v2
