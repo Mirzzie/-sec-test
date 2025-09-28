@@ -7,6 +7,11 @@ data "aws_vpc" "default" {
   default = true
 }
 
+# Fetch your current public IP
+data "http" "my_ip" {
+  url = "https://ifconfig.me/ip"
+}
+
 resource "aws_security_group" "staging_sg" {
   name        = "staging-sg"
   description = "Allow SSH and app port"
@@ -16,21 +21,21 @@ resource "aws_security_group" "staging_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
 
     ingress {
     from_port   = 4280
     to_port     = 4280
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
 
     ingress {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
   egress {
     from_port   = 0
@@ -48,7 +53,7 @@ resource "aws_instance" "staging" {
   user_data              = file("user-data.sh")
 
   tags = {
-    Name = "staging-juiceshop"
+    Name = "staging"
   }
 }
 
