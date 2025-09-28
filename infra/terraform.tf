@@ -12,6 +12,17 @@ data "http" "my_ip" {
   url = "https://ifconfig.me/ip"
 }
 
+# Fetch GitHub meta JSON
+data "http" "github_meta" {
+  url = "https://api.github.com/meta"
+}
+
+# Decode JSON and extract Actions runner IPs
+locals {
+  github_actions_ips = jsondecode(data.http.github_meta.response_body).actions
+}
+
+
 resource "aws_security_group" "staging_sg" {
   name        = "staging-sg"
   description = "Allow SSH and app port"
@@ -30,7 +41,13 @@ resource "aws_security_group" "staging_sg" {
     protocol    = "tcp"
     cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
-
+  ingress {
+    description = "DVWA from GitHub Actions"
+    from_port   = 4280
+    to_port     = 4280
+    protocol    = "tcp"
+    cidr_blocks = local.github_actions_ips
+  }
     ingress {
     from_port   = 3306
     to_port     = 3306
