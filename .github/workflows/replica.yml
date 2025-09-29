@@ -121,9 +121,3 @@ jobs:
           APP_HOST: "http://${{ secrets.STAGING_SSH_HOST }}:4280"
           APP_ID: ${{ secrets.STACKHAWK_APP_ID }}
           APP_ENV: "staging"
-
-      - name: Upload StackHawk report
-        uses: actions/upload-artifact@v4
-        with:
-          name: stackhawk-report
-          path: stackhawk-report.json
