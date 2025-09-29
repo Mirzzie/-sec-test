@@ -19,7 +19,11 @@ data "http" "github_meta" {
 
 # Decode JSON and extract Actions runner IPs
 locals {
-  github_actions_ips = jsondecode(data.http.github_meta.response_body).actions
+  github_actions_ipv4 = [
+    for cidr in jsondecode(data.http.github_meta.response_body).actions :
+    cidr
+    if can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+/", cidr))
+  ]
 }
 
 
@@ -32,27 +36,27 @@ resource "aws_security_group" "staging_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
     ingress {
     from_port   = 4280
     to_port     = 4280
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    description = "DVWA from GitHub Actions"
-    from_port   = 4280
-    to_port     = 4280
-    protocol    = "tcp"
-    cidr_blocks = local.github_actions_ips
-  }
+  # ingress {
+  #   description = "DVWA from GitHub Actions"
+  #   from_port   = 4280
+  #   to_port     = 4280
+  #   protocol    = "tcp"
+  #   cidr_blocks = local.github_actions_ipv4
+  # }
     ingress {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
     from_port   = 0
